@@ -4,14 +4,14 @@
 DotOverload provides a way to add aspect like behavior to both
 explicit dots (i.e. method calls and member access) as well as
 implicit dots (e.g. array indexing) in C#. An example use case
-is wrapping a LINQ statement with an overload environment to
+is wrapping fluent method calls with an overload environment to
 allow for easy logging.
 
 == Hello, DotOverload!
 In Objective-C, sending a message to nil results in nil, instead of
-an exception being thrown. Ir would be nice to have an easy way
+an exception being thrown. It would be nice to have an easy way
 to have this behavior in certain contexts when using .NET. A
-way to define this behavior using DotOverload would be
+way to define this behavior using DotOverload is
   var safeDot = Dot.Bind<object,object>((current,rest) =>
   {
       if(current == null)
@@ -28,15 +28,22 @@ Then, to use safeDot
 
 What does this code do exactly? Dot.Bind takes a function that has two
 parameters, current and rest. The parameter current represents
-the current value of the computation. Also, rest is a function that
-represents the rest of the computation, take some object as a parameter.
+the current value of the computation. The parameter rest is a function that
+represents the rest of the computation that takes some object as a parameter.
 In our example 
   safeDot(() => object.ToString().ToString());
 the first time a dot is reached, the value of current is null, and the
 value of rest is
-  (x) => x.ToString().ToString().ToString()
+  (x) => x.ToString().ToString()
 However, since current actually is null, we immediately return null,
-and abandon the rest of the computation.
+and abandon the rest of the computation. One more important point to note
+is that in C#, there is actua
+variable, including local variables. So,
+  safeDot(() => object.ToString().ToString());
+is really
+  safeDot(() => SomeClassObject.object.ToString().ToString());
+This suits our purposes though, as it prevents the invocation of the first
+dot without getting a chance to intercept it.
   
 == Example: Logging
 Another useful way to use DotOverload is to add logging.
@@ -54,12 +61,11 @@ will output
   "hi"
 
 == Limitations
-- Only expressions can be passed into DotOverloads, no statments lambdas
-are allowed.
+- Only expressions can be passed into DotOverloads, no statement lambdas are allowed.
 - Composition of DotOverloads is currently nonexistent.
 
 == Other Notes
-Yes, Dot.Bind is really just >>= without the type system Haskell provides. It's still suprsiingly useful even if everything is casted down to object.
+Yes, Dot.Bind is really just >>= without the type system Haskell provides. It's still surprisingly useful even if everything is casted down to object.
 
 == Contributing to DotOverload
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
