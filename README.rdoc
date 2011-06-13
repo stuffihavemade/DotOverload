@@ -1,0 +1,77 @@
+= DotOverload
+
+== What is DotOverload?
+DotOverload provides a way to add aspect like behavior to both
+explicit dots (i.e. method calls and member access) as well as
+implicit dots (e.g. array indexing) in C#. An example use case
+is wrapping a LINQ statement with an overload environment to
+allow for easy logging.
+
+== Hello, DotOverload!
+In Objective-C, sending a message to nil results in nil, instead of
+an exception being thrown. Ir would be nice to have an easy way
+to have this behavior in certain contexts when using .NET. A
+way to define this behavior using DotOverload would be
+  var safeDot = Dot.Bind<object,object>((current,rest) =>
+  {
+      if(current == null)
+          return null;
+      else
+          return rest(current);
+  });
+
+Then, to use safeDot
+  object actuallyNull = null;
+  //return null instead of throwing NullReferenceException
+  safeDot(() => object.ToString().ToString());
+
+
+What does this code do exactly? Dot.Bind takes a function that has two
+parameters, current and rest. The parameter current represents
+the current value of the computation. Also, rest is a function that
+represents the rest of the computation, take some object as a parameter.
+In our example 
+  safeDot(() => object.ToString().ToString());
+the first time a dot is reached, the value of current is null, and the
+value of rest is
+  (x) => x.ToString().ToString().ToString()
+However, since current actually is null, we immediately return null,
+and abandon the rest of the computation.
+  
+== Example: Logging
+Another useful way to use DotOverload is to add logging.
+  var logger = Dot.Bind<T,U>((current, rest) =>
+  {
+      someLoggerObject.Log(current);
+      return rest(current);
+  });
+
+This
+  logger(() => "hi".ToUpper().ToLower());
+will output
+  "hi"
+  "HI"
+  "hi"
+
+== Limitations
+- Only expressions can be passed into DotOverloads, no statments lambdas
+are allowed.
+- Composition of DotOverloads is currently nonexistent.
+
+== Other Notes
+Yes, Dot.Bind is really just >>= without the type system Haskell provides. It's still suprsiingly useful even if everything is casted down to object.
+
+== Contributing to DotOverload
+* Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
+* Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
+* Fork the project
+* Start a feature/bugfix branch
+* Commit and push until you are happy with your contribution
+* Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
+
+== Contact
+me@stuffivemade.com
+
+== Copyright
+Copyright (c) 2011 me. See LICENSE.txt for
+further details.
