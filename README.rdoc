@@ -23,7 +23,7 @@ way to define this behavior using DotOverload is
 Then, to use safeDot
   object actuallyNull = null;
   //return null instead of throwing NullReferenceException
-  safeDot(() => object.ToString().ToString());
+  safeDot(() => actuallyNull.ToString().ToString());
 
 
 What does this code do exactly? Dot.Bind takes a function that has two
@@ -31,19 +31,12 @@ parameters, current and rest. The parameter current represents
 the current value of the computation. The parameter rest is a function that
 represents the rest of the computation that takes some object as a parameter.
 In our example 
-  safeDot(() => object.ToString().ToString());
+  safeDot(() => actuallyNull.ToString().ToString());
 the first time a dot is reached, the value of current is null, and the
 value of rest is
   (x) => x.ToString().ToString()
 However, since current actually is null, we immediately return null,
-and abandon the rest of the computation. One more important point to note
-is that in C#, there is actua
-variable, including local variables. So,
-  safeDot(() => object.ToString().ToString());
-is really
-  safeDot(() => SomeClassObject.object.ToString().ToString());
-This suits our purposes though, as it prevents the invocation of the first
-dot without getting a chance to intercept it.
+and abandon the rest of the computation.
   
 == Example: Logging
 Another useful way to use DotOverload is to add logging.
@@ -63,9 +56,7 @@ will output
 == Limitations
 - Only expressions can be passed into DotOverloads, no statement lambdas are allowed.
 - Composition of DotOverloads is currently nonexistent.
-
-== Other Notes
-Yes, Dot.Bind is really just >>= without the type system Haskell provides. It's still surprisingly useful even if everything is casted down to object.
+- DotOverload is currently too slow for practical use, due to the time needed to compile the expression tree. I believe that this could be sped up to acceptable speeds (i.e. in the magnitude of normal reflection) if an evaling tree walker was used instead. Patches are welcome for this!
 
 == Contributing to DotOverload
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
