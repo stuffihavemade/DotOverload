@@ -23,21 +23,49 @@ way to define this behavior using DotOverload is
 Then, to use safeDot
   object actuallyNull = null;
   //return null instead of throwing NullReferenceException
-  safeDot(() => actuallyNull.ToString().ToString());
+  safeDot(() => actuallyNull.ToString().ToUpper());
 
+What is happening here underneath the hood? Basically,
 
-What does this code do exactly? Dot.Bind takes a function that has two
-parameters, current and rest. The parameter current represents
-the current value of the computation. The parameter rest is a function that
-represents the rest of the computation that takes some object as a parameter.
-In our example 
-  safeDot(() => actuallyNull.ToString().ToString());
-the first time a dot is reached, the value of current is null, and the
-value of rest is
-  (x) => x.ToString().ToString()
-However, since current actually is null, we immediately return null,
-and abandon the rest of the computation.
-  
+  actuallyNull.ToString().ToUpper()
+
+is transformed into
+
+  (x) =>
+  {
+    if(x == null)
+      return null;
+    else
+    {
+      return (y) =>
+      {
+        if (y == null)
+          return null;
+        else
+          return (y.ToUpper())
+      }(x.ToString());
+    }
+  }(actuallyNull);
+
+So, at the first enterance of 
+
+  {
+      if(current == null)
+          return null;
+      else
+          return rest(current);
+  });
+
+current will equal null, and rest is roughly
+
+      (y) =>
+      {
+        if (y == null)
+          return null;
+        else
+          return (y.ToUpper())
+      }(current.ToString());
+
 == Example: Logging
 Another useful way to use DotOverload is to add logging.
   var logger = Dot.Bind<T,U>((current, rest) =>
