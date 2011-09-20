@@ -160,7 +160,7 @@ namespace DotOverload
             else
             {
                 //There are many other possiblities that can
-                //be dotted into (e.g. constants, list inites, etc.)
+                //be dotted into (e.g. constants, list inits, etc.)
                 //but they all start at the front of a dot expression.
                 return stack.Push(exp);
             }

@@ -9,10 +9,6 @@ namespace DotOverload.Tests
     [TestClass]
     public class DotTest
     {
-        //[TestInitialize()]
-        //public void MyTestInitialize()
-        //{
-        //}
         [TestMethod]
         public void Safe_degenerate_case()
         {
